@@ -1,0 +1,6 @@
+[package]
+name = "MESC"
+version = "0.1.0"
+authors = ["Łukasz Sroka <sroka.dev@gmail.com>"]
+
+[dependencies]
