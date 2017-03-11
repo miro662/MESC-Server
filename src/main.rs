@@ -24,8 +24,8 @@ fn handle_client(stream: net::TcpStream) {
     u.start_reading();
     thread::spawn(move || {
       while let Ok(Data::Msg(mut data)) =  rx.recv() {
-        data.push(10); // Adding new line at the end
-        u.send_msg(data);
+        data.push('\n'); // Adding new line at the end
+        u.send_msg(&data);
       }
       println!("closed!");
     });

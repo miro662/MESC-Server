@@ -5,13 +5,14 @@ pub mod user {
   use std::thread;
   use std::sync::mpsc;
 
-  pub struct User {
+  pub struct User
+  {
     socket: net::TcpStream,
     sender: mpsc::Sender<Data>,
   }
 
   pub enum Data {
-    Msg(Vec<u8>),
+    Msg(String),
   }
 
   impl User {
@@ -26,13 +27,13 @@ pub mod user {
         let tx = self.sender.clone();
         thread::spawn( move || {
           for data in reader.lines() {
-            tx.send(Data::Msg(data.unwrap().to_string().into_bytes()));
+            tx.send(Data::Msg(data.unwrap()));
           }
         });
     }
 
-    pub fn send_msg(&mut self, data: Vec<u8>){
-      self.socket.write(&data);
+    pub fn send_msg(&mut self, data: &str){
+      self.socket.write(data.as_bytes());
     }
   }
 }
