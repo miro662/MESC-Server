@@ -1,6 +1,6 @@
 pub mod user {
 
-  use std::io::{Read, Write};
+  use std::io::{Read, Write, BufRead, BufReader};
   use std::net;
   use std::thread;
   use std::sync::mpsc;
@@ -22,10 +22,11 @@ pub mod user {
 
     pub fn start_reading(&self) {
         let mut soc_clone = self.socket.try_clone().unwrap();
+        let reader = BufReader::new(soc_clone);
         let tx = self.sender.clone();
         thread::spawn( move || {
-          while let Some(data) = soc_clone.read_line(){
-            tx.send(Data::Msg(data));
+          for data in reader.lines() {
+            tx.send(Data::Msg(data.unwrap().to_string().into_bytes()));
           }
         });
     }
@@ -34,28 +35,4 @@ pub mod user {
       self.socket.write(&data);
     }
   }
-
-  trait Reader {
-    fn read_line(&mut self) -> Option<Vec<u8>>;
-  }
-  impl Reader for net::TcpStream {
-    fn read_line(&mut self) -> Option<Vec<u8>> {
-      let mut data: Vec<u8> = Vec::new();
-      loop {
-        let mut text = [0; 20];
-        let n = self.read(&mut text).unwrap_or_default();
-        if n > 0 {
-          data.append(&mut text[0..n].to_vec());
-          if text[n-1] == 10 { // if last read character is newline
-              break;
-          }
-          continue;
-        }
-        return Option::None;
-      }
-      let _ = data.pop();
-      Option::Some(data)
-    }
-  }
-  
 }
